@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encryption & Protocols — IT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1F6;
+    --panel:#FFFFFF;
+    --ink:#101826;
+    --ink-soft:#4A5568;
+    --line:#D3DAE6;
+    --brass:#A9772E;
+    --brass-deep:#7C5620;
+    --teal:#245A5E;
+    --teal-bg:#E1EEEE;
+    --rust:#9C4326;
+    --rust-bg:#F6E4DD;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--brass);color:#fff;}
+
+  /* ---------- score pill ---------- */
+  #scorebar{
+    position:fixed;
+    top:16px;
+    right:16px;
+    background:var(--ink);
+    color:#fff;
+    font-family:var(--mono);
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:999px;
+    z-index:50;
+    box-shadow:0 6px 18px rgba(16,24,38,0.25);
+    letter-spacing:0.02em;
+  }
+  #scorebar span{color:#E9C88A;}
+
+  /* ---------- layout shell ---------- */
+  .wrap{max-width:700px;margin:0 auto;padding:0 24px 120px;}
+  section{padding-top:64px;}
+  .rule{height:1px;background:var(--line);margin:56px 0;}
+
+  .kicker{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--brass-deep);
+    letter-spacing:0.03em;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .kicker::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  h1,h2,h3{font-family:var(--serif);font-weight:600;color:var(--ink);margin:0 0 14px;}
+  h2{font-size:30px;line-height:1.15;}
+  h3{font-size:19px;margin-top:32px;color:var(--ink);}
+  p{max-width:64ch;color:var(--ink-soft);font-size:16px;}
+  p.lead{color:var(--ink);font-size:17px;}
+  strong{color:var(--ink);font-weight:600;}
+  ul{padding-left:20px;color:var(--ink-soft);}
+  li{margin-bottom:6px;}
+  a{color:var(--brass-deep);}
+
+  code, .cipher{
+    font-family:var(--mono);
+    background:#101826;
+    color:#DCE6F0;
+    padding:2px 6px;
+    border-radius:3px;
+    font-size:0.88em;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:72px 24px 40px;
+    max-width:700px;
+    margin:0 auto;
+  }
+  .hero .kicker{margin-bottom:18px;}
+  .hero h1{font-size:44px;line-height:1.08;letter-spacing:-0.01em;}
+  .hero p{font-size:17.5px;max-width:56ch;}
+  .cipher-strip{
+    margin-top:28px;
+    font-family:var(--mono);
+    font-size:15px;
+    background:#101826;
+    color:#8FE3C7;
+    border-radius:8px;
+    padding:16px 18px;
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .cipher-strip .fade{color:#DCE6F0;}
+  .scope-note{
+    margin-top:28px;
+    border-left:3px solid var(--brass);
+    padding:4px 0 4px 16px;
+    font-size:14.5px;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- info blocks ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px 24px;
+    margin-top:22px;
+  }
+  table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14.5px;}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-family:var(--mono);font-weight:500;font-size:12.5px;color:var(--ink-soft);text-transform:none;}
+  tr:last-child td{border-bottom:none;}
+
+  /* ---------- task (short answer) ---------- */
+  .task{
+    margin-top:28px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--panel);
+  }
+  .task-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 20px;
+    background:var(--teal-bg);
+    border-bottom:1px solid var(--line);
+  }
+  .task-head .tag{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--teal);
+    background:#fff;
+    border:1px solid #BFD9D9;
+    padding:2px 8px;
+    border-radius:5px;
+  }
+  .task-head .pt{
+    margin-left:auto;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--teal);
+  }
+  .task-body{padding:20px;}
+  .task-body p.prompt{color:var(--ink);font-size:15.5px;margin-top:0;max-width:none;}
+  textarea{
+    width:100%;
+    min-height:90px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    font-family:var(--sans);
+    font-size:14.5px;
+    color:var(--ink);
+    resize:vertical;
+    background:#FBFCFE;
+  }
+  textarea:focus, button:focus-visible, .opt:focus-visible{
+    outline:2px solid var(--brass);
+    outline-offset:1px;
+  }
+  .btn{
+    margin-top:12px;
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:14px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .btn:hover{background:#1E2A3F;}
+  .btn.ghost{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .btn.ghost:hover{background:#F2F4F8;}
+
+  .answer{
+    display:none;
+    margin-top:16px;
+    padding:14px 16px;
+    background:var(--teal-bg);
+    border-radius:8px;
+    border:1px solid #BFD9D9;
+  }
+  .answer.show{display:block;}
+  .answer .a-label{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--teal);
+    margin-bottom:6px;
+    display:block;
+  }
+  .answer p{color:var(--ink);font-size:14.5px;margin:0;max-width:none;}
+
+  .self-score{
+    display:none;
+    margin-top:14px;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .self-score.show{display:flex;}
+  .self-score input{width:17px;height:17px;accent-color:var(--brass);cursor:pointer;}
+  .self-score label{cursor:pointer;}
+
+  /* ---------- MCQ ---------- */
+  .mcq{
+    margin-top:24px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    background:var(--panel);
+  }
+  .mcq p.prompt{color:var(--ink);font-size:15.5px;margin:0 0 14px;max-width:none;}
+  .opt{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#FBFCFE;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:11px 14px;
+    margin-bottom:9px;
+    font-family:var(--sans);
+    font-size:14.5px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .opt:hover{border-color:var(--brass);}
+  .opt.correct{background:#E4F2E8;border-color:#8FC7A0;color:#1F5C33;}
+  .opt.wrong{background:var(--rust-bg);border-color:#E0AE9B;color:var(--rust);}
+  .opt.disabled{cursor:default;pointer-events:none;}
+  .mcq-feedback{
+    margin-top:6px;
+    font-size:14px;
+    font-family:var(--mono);
+    display:none;
+  }
+  .mcq-feedback.show{display:block;}
+  .mcq-feedback.ok{color:#1F5C33;}
+  .mcq-feedback.no{color:var(--rust);}
+
+  footer{
+    max-width:700px;margin:0 auto;padding:40px 24px 80px;
+    font-size:13.5px;color:var(--ink-soft);
+  }
+
+  @media (max-width:600px){
+    .hero h1{font-size:33px;}
+    h2{font-size:25px;}
+    #scorebar{top:auto;bottom:14px;right:14px;font-size:12px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    * {transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div id="scorebar">Score: <span id="scoreval">0</span> / <span id="scoremax">12</span></div>
+
+<div class="hero">
+  <div class="kicker">IT · NETWORK SECURITY</div>
+  <h1>How your data stays private on the way there</h1>
+  <p class="lead">Encryption and the protocols that use it — symmetric vs asymmetric keys, wired vs wireless, and what's actually happening behind the padlock icon in your browser.</p>
+  <div class="cipher-strip" id="cipherStrip">CALL ME TODAY</div>
+</div>
+
+<div class="wrap">
+
+
+
+  <!-- ============ SECTION 2 ============ -->
+  <section id="s2">
+    <div class="kicker">ENCRYPTION · SYMMETRIC</div>
+    <h2>Symmetric encryption: one key, two jobs</h2>
+    <p>The sender encrypts with a key, and the receiver decrypts with <strong>the same key</strong>. It's fast — which is why it's the default choice for large amounts of data — but that single shared key is also its weak point: however it gets from sender to receiver, that journey has to be secure, and if a bad actor ever captures it, every message encrypted with it is exposed.</p>
+
+    <div class="task">
+      <div class="task-head">
+        <span class="tag">TASK 1 · SCENARIO</span>
+        <span class="pt">1 point</span>
+      </div>
+      <div class="task-body">
+        <p class="prompt">A hospital backs up several terabytes of patient scan files to its own internal server overnight. One technician suggests asymmetric encryption; another suggests symmetric. Which would you recommend, and what's the one serious risk that comes with your choice?</p>
+        <textarea id="t2" placeholder="Type your answer here..."></textarea><br>
+        <button class="btn" onclick="checkAnswer('t2')">Check answer</button>
+        <div class="answer" id="t2-answer">
+          <span class="a-label">MODEL ANSWER</span>
+          <p>Symmetric is the better fit — it's much faster, which matters when you're encrypting huge volumes of data like scan files. The risk to manage is key distribution: because the same key both encrypts and decrypts, if that key is ever intercepted or leaked, an attacker could decrypt every backup made with it.</p>
+        </div>
+        <div class="self-score" id="t2-score">
+          <input type="checkbox" id="t2-check" onchange="awardPoint(this,1)">
+          <label for="t2-check">My answer covered this — award myself the point</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- ============ SECTION 3 ============ -->
+  <section id="s3">
+    <div class="kicker">ENCRYPTION · ASYMMETRIC</div>
+    <h2>Asymmetric encryption: two keys, split jobs</h2>
+    <p>Asymmetric encryption uses a <strong>public key</strong> and a <strong>private key</strong>, created together as a pair that only work with each other. The public key is shared openly and used to <em>encrypt</em>; the matching private key is kept secret by its owner and used to <em>decrypt</em>. It's slower than symmetric encryption, so it's typically reserved for smaller, high-value data like passwords or bank details.</p>
+
+    <div class="task">
+      <div class="task-head">
+        <span class="tag">TASK 2 · SCENARIO</span>
+        <span class="pt">1 point</span>
+      </div>
+      <div class="task-body">
+        <p class="prompt">Alice wants to send Bob a confidential message over an insecure email server, and the two of them have never met to exchange a secret key. Walk through what happens to the message, naming which key does which job.</p>
+        <textarea id="t3" placeholder="Type your answer here..."></textarea><br>
+        <button class="btn" onclick="checkAnswer('t3')">Check answer</button>
+        <div class="answer" id="t3-answer">
+          <span class="a-label">MODEL ANSWER</span>
+          <p>Bob generates a key pair and shares his <strong>public key</strong> openly. Alice uses Bob's public key to encrypt her message into cipher text and sends it across the insecure server. Bob then uses his own <strong>private key</strong> — which he has never shared with anyone — to decrypt it back into plain text. Because only Bob's private key can reverse the encryption, the message stays confidential even though it crossed an insecure channel.</p>
+        </div>
+        <div class="self-score" id="t3-score">
+          <input type="checkbox" id="t3-check" onchange="awardPoint(this,1)">
+          <label for="t3-check">My answer covered this — award myself the point</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- ============ SECTION 4 ============ -->
+  <section id="s4">
+    <div class="kicker">ENCRYPTION · CHOOSING A TYPE</div>
+    <h2>Picking the right one for the job</h2>
+    <p>The choice usually comes down to what the situation needs more: <strong>speed</strong> or <strong>security</strong>.</p>
+
+    <div class="panel">
+      <table>
+        <tr><th>Type</th><th>Suits</th><th>Why</th></tr>
+        <tr>
+          <td><strong>Symmetric</strong></td>
+          <td>Large files, databases</td>
+          <td>Fast and efficient for bulk data; often the same person encrypts and decrypts, e.g. backups.</td>
+        </tr>
+        <tr>
+          <td><strong>Asymmetric</strong></td>
+          <td>Confidential, small transactions</td>
+          <td>Sharing highly sensitive data — passwords, bank details, government communications.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="mcq" data-answer="b">
+      <p class="prompt"><strong>1.</strong> Which encryption type best suits encrypting a single password field when a user logs into their bank account?</p>
+      <button class="opt" data-key="a">Symmetric encryption</button>
+      <button class="opt" data-key="b">Asymmetric encryption</button>
+      <button class="opt" data-key="c">Neither — passwords don't need encryption</button>
+      <button class="opt" data-key="d">Quantum key distribution</button>
+      <div class="mcq-feedback"></div>
+    </div>
+
+    <div class="mcq" data-answer="c">
+      <p class="prompt"><strong>2.</strong> What's the main advantage of symmetric encryption over asymmetric?</p>
+      <button class="opt" data-key="a">It's more secure overall</button>
+      <button class="opt" data-key="b">It uses two separate keys</button>
+      <button class="opt" data-key="c">It's faster for large amounts of data</button>
+      <button class="opt" data-key="d">It never needs a key at all</button>
+      <div class="mcq-feedback"></div>
+    </div>
+
+    <div class="mcq" data-answer="b">
+      <p class="prompt"><strong>3.</strong> What's the main practical problem with symmetric encryption?</p>
+      <button class="opt" data-key="a">It's too slow for most uses</button>
+      <button class="opt" data-key="b">Securely sharing the one key between sender and receiver</button>
+      <button class="opt" data-key="c">It can't be used on wireless networks</button>
+      <button class="opt" data-key="d">It only works with plain text, never files</button>
+      <div class="mcq-feedback"></div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- ============ SECTION 5 ============ -->
+  <section id="s5">
+    <div class="kicker">PROTOCOLS</div>
+    <h2>SSL/TLS: encryption in your browser bar</h2>
+    <p><strong>SSL</strong> (Secure Sockets Layer) is a protocol that encrypts data sent over the internet, guarding against eavesdropping, tampering, and man-in-the-middle attacks — the sort of protection online payments and login pages depend on. <strong>TLS</strong> (Transport Layer Security) is its successor: same job, more secure and more efficient. When you see <strong>HTTPS</strong> in the address bar, TLS (still often called "SSL" out of habit) is doing that work.</p>
+    <p>In short: your browser and the server agree on how to trust each other, then switch to a fast, shared encryption key for the rest of the session — a symmetric key, set up using asymmetric encryption first, which is why both types matter here.</p>
+
+    <div class="task">
+      <div class="task-head">
+        <span class="tag">TASK 3</span>
+        <span class="pt">1 point</span>
+      </div>
+      <div class="task-body">
+        <p class="prompt">A friend says: <em>"The padlock and https:// in my browser mean the website itself is trustworthy and safe to buy from."</em> What does that padlock actually confirm — and what does it <strong>not</strong> guarantee?</p>
+        <textarea id="t4" placeholder="Type your answer here..."></textarea><br>
+        <button class="btn" onclick="checkAnswer('t4')">Check answer</button>
+        <div class="answer" id="t4-answer">
+          <span class="a-label">MODEL ANSWER</span>
+          <p>The padlock/HTTPS confirms that TLS (or SSL) has encrypted the connection between the browser and that server, so data passing between them is protected from eavesdropping and tampering in transit. It does <strong>not</strong> guarantee the site's owner is honest or that the business is legitimate — a scam site can use HTTPS too. It proves the connection is private, not that the destination deserves your trust.</p>
+        </div>
+        <div class="self-score" id="t4-score">
+          <input type="checkbox" id="t4-check" onchange="awardPoint(this,1)">
+          <label for="t4-check">My answer covered this — award myself the point</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- ============ FINAL QUIZ ============ -->
+  <section id="s6">
+    <div class="kicker">REVIEW</div>
+    <h2>Four more to review</h2>
+
+
+    <div class="mcq" data-answer="b">
+      <p class="prompt"><strong>1.</strong> What is data called once encryption has been applied to it?</p>
+      <button class="opt" data-key="a">Plain text</button>
+      <button class="opt" data-key="b">Cipher text</button>
+      <button class="opt" data-key="c">Master text</button>
+      <button class="opt" data-key="d">Source text</button>
+      <div class="mcq-feedback"></div>
+    </div>
+
+    <div class="mcq" data-answer="c">
+      <p class="prompt"><strong>2.</strong> In asymmetric encryption, which key does the <em>sender</em> use to encrypt a message?</p>
+      <button class="opt" data-key="a">Their own private key</button>
+      <button class="opt" data-key="b">Their own public key</button>
+      <button class="opt" data-key="c">The receiver's public key</button>
+      <button class="opt" data-key="d">The receiver's private key</button>
+      <div class="mcq-feedback"></div>
+    </div>
+
+    <div class="mcq" data-answer="b">
+      <p class="prompt"><strong>3.</strong> Which statement about TLS is correct?</p>
+      <button class="opt" data-key="a">TLS is older than SSL</button>
+      <button class="opt" data-key="b">TLS is the successor to SSL, and is more secure and efficient</button>
+      <button class="opt" data-key="c">TLS only works on wired networks</button>
+      <button class="opt" data-key="d">TLS removes the need for any keys</button>
+      <div class="mcq-feedback"></div>
+    </div>
+
+    <div class="mcq" data-answer="a">
+      <p class="prompt"><strong>4.</strong> A shop needs to protect thousands of large video files on its own server, where speed matters more than maximum security for this particular job. Which type fits best?</p>
+      <button class="opt" data-key="a">Symmetric encryption</button>
+      <button class="opt" data-key="b">Asymmetric encryption</button>
+      <button class="opt" data-key="c">No encryption is needed for stored files</button>
+      <button class="opt" data-key="d">Quantum key distribution</button>
+      <div class="mcq-feedback"></div>
+    </div>
+  </section>
+
+  <footer>
+    Scores here are just for your own revision — they don't save or sync anywhere.
+  </footer>
+</div>
+
+<script>
+  // ---------- score tracking (in-memory only) ----------
+  let score = 0;
+  const scoreEl = document.getElementById('scoreval');
+  function addScore(n){
+    score += n;
+    scoreEl.textContent = score;
+  }
+
+  // ---------- short-answer tasks ----------
+  function checkAnswer(id){
+    document.getElementById(id + '-answer').classList.add('show');
+    document.getElementById(id + '-score').classList.add('show');
+  }
+  function awardPoint(checkbox, points){
+    addScore(checkbox.checked ? points : -points);
+  }
+
+  // ---------- multiple choice ----------
+  document.querySelectorAll('.mcq').forEach(function(mcq){
+    const correctKey = mcq.getAttribute('data-answer');
+    const feedback = mcq.querySelector('.mcq-feedback');
+    mcq.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const opts = mcq.querySelectorAll('.opt');
+        opts.forEach(o => o.classList.add('disabled'));
+        const chosenKey = btn.getAttribute('data-key');
+        if(chosenKey === correctKey){
+          btn.classList.add('correct');
+          feedback.textContent = 'Correct.';
+          feedback.classList.add('show','ok');
+          addScore(1);
+        } else {
+          btn.classList.add('wrong');
+          mcq.querySelector('.opt[data-key="' + correctKey + '"]').classList.add('correct');
+          feedback.textContent = 'Not quite — correct answer highlighted above.';
+          feedback.classList.add('show','no');
+        }
+      });
+    });
+  });
+
+  // ---------- hero cipher scramble (one on-load moment) ----------
+  (function(){
+    const el = document.getElementById('cipherStrip');
+    const plain = 'CALL ME TODAY';
+    const cipher = 'DH12#DJDI2+RG';
+    let frame = 0;
+    const totalFrames = 26;
+    function step(){
+      frame++;
+      if(frame <= 10){
+        el.textContent = plain;
+      } else if(frame <= 20){
+        // scramble transition
+        let out = '';
+        for(let i=0;i<plain.length;i++){
+          out += (Math.random() < (frame-10)/10) ? cipher[i] : plain[i];
+        }
+        el.textContent = out;
+      } else {
+        el.textContent = cipher;
+      }
+      if(frame < totalFrames){
+        requestAnimationFrame(() => setTimeout(step, 60));
+      }
+    }
+    step();
+  })();
+</script>
+
+</body>
+</html>
